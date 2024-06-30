@@ -56,8 +56,11 @@ function render(el, container) {
       children: [el],
     },
   };
+
+  root = nextWorkOfUnit;
 }
 
+let root = null;
 let nextWorkOfUnit = null;
 function workLoop(deadline) {
   let shouldYeild = false;
@@ -66,7 +69,28 @@ function workLoop(deadline) {
     nextWorkOfUnit = performWorkerOfUnit(nextWorkOfUnit);
     shouldYeild = deadline.timeRemaining() < 1;
   }
+
+  // the tree has been converted to a linked list by this point
+  // render all elements (avoid non-existent idle causing render stutter/incomplete render
+  if (!nextWorkOfUnit && root) {
+    commitRoot();
+  }
+
   requestIdleCallback(workLoop);
+}
+
+function commitRoot() {
+  commitWork(root.child);
+  root = null;
+}
+
+function commitWork(fiber) {
+  if (!fiber) {
+    return;
+  }
+  fiber.parent.dom.append(fiber.dom);
+  commitWork(fiber.child);
+  commitWork(fiber.sibling);
 }
 
 function createDOM(type) {
@@ -110,7 +134,7 @@ function performWorkerOfUnit(fiber) {
   if (!fiber.dom) {
     const dom = (fiber.dom = createDOM(fiber.type));
 
-    fiber.parent.dom.append(dom);
+    // fiber.parent.dom.append(dom);
 
     // 2. handle props
     updateProps(dom, fiber.props);
