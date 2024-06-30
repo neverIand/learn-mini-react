@@ -1,4 +1,4 @@
-import React from "../core/React.js";
+import React from "./core/React";
 
 // const App = React.createElement(
 //   "div",

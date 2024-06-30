@@ -50,25 +50,86 @@ function createElement(type, props, ...children) {
 // dom.append(textNode);
 
 function render(el, container) {
-  const dom =
-    el.type === "TEXT_ELEMENT"
-      ? document.createTextNode("")
-      : document.createElement(el.type);
+  nextWorkOfUnit = {
+    dom: container,
+    props: {
+      children: [el],
+    },
+  };
+}
 
-  // id, class...
-  Object.keys(el.props).forEach((key) => {
+let nextWorkOfUnit = null;
+function workLoop(deadline) {
+  let shouldYeild = false;
+  while (!shouldYeild && nextWorkOfUnit) {
+    // execute current task and return next task
+    nextWorkOfUnit = performWorkerOfUnit(nextWorkOfUnit);
+    shouldYeild = deadline.timeRemaining() < 1;
+  }
+  requestIdleCallback(workLoop);
+}
+
+function createDOM(type) {
+  return type === "TEXT_ELEMENT"
+    ? document.createTextNode("")
+    : document.createElement(type);
+}
+
+function updateProps(dom, props) {
+  Object.keys(props).forEach((key) => {
     if (key !== "children") {
-      dom[key] = el.props[key];
+      dom[key] = props[key];
     }
   });
-
-  const children = el.props.children;
-  children.forEach((child) => {
-    render(child, dom);
-  });
-
-  container.append(dom);
 }
+
+function initChildren(fiber) {
+  const children = fiber.props.children;
+  let prevChild = null; // i.e. parent of this node
+  children.forEach((child, index) => {
+    // if we add the parent directly to vdom, it will break its structure, so we create a new variable here
+    const newFiber = {
+      type: child.type,
+      props: child.props,
+      child: null,
+      parent: fiber,
+      sibling: null,
+      dom: null,
+    };
+    if (index === 0) {
+      fiber.child = newFiber;
+    } else {
+      prevChild.sibling = newFiber;
+    }
+    prevChild = newFiber;
+  });
+}
+
+function performWorkerOfUnit(fiber) {
+  // 1. create dom
+  if (!fiber.dom) {
+    const dom = (fiber.dom = createDOM(fiber.type));
+
+    fiber.parent.dom.append(dom);
+
+    // 2. handle props
+    updateProps(dom, fiber.props);
+  }
+
+  // 3. convert dom tree into linked list and set up the pointers (convertion happens during the traversal for efficiency)
+  initChildren(fiber);
+
+  // 4. return next task
+  if (fiber.child) {
+    return fiber.child;
+  }
+  if (fiber.sibling) {
+    return fiber.sibling;
+  }
+  return fiber.parent?.sibling;
+}
+
+requestIdleCallback(workLoop);
 
 const React = {
   render,
