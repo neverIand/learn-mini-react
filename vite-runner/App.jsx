@@ -19,8 +19,8 @@ function DemoAppFunction() {
 // See how jsx is converted by Vite under the hood
 console.log(DemoAppFunction);
 
-function Counter() {
-  return <div>count</div>;
+function Counter({ num }) {
+  return <div>count:{num}</div>;
 }
 
 function CounterContainer() {
@@ -39,7 +39,8 @@ function App() {
   return (
     <div>
       hello world from mini-react
-      <Counter></Counter>
+      <Counter num={10}></Counter>
+      <Counter num={20}></Counter>
       {/* <CounterContainer></CounterContainer> */}
     </div>
   );

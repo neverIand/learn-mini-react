@@ -31,7 +31,10 @@ function createElement(type, props, ...children) {
     props: {
       ...props,
       children: children.map((child) => {
-        return typeof child === "string" ? createTextNode(child) : child;
+        // console.log(child);
+        const isTextNode =
+          typeof child === "string" || typeof child === "number";
+        return isTextNode ? createTextNode(child) : child;
       }),
     },
   };
@@ -150,17 +153,24 @@ function performWorkerOfUnit(fiber) {
   }
 
   // 3. convert dom tree into linked list and set up the pointers (convertion happens during the traversal for efficiency)
-  const children = isFunctionComponent ? [fiber.type()] : fiber.props.children;
+  const children = isFunctionComponent
+    ? [fiber.type(fiber.props)]
+    : fiber.props.children;
   initChildren(fiber, children);
 
   // 4. return next task
   if (fiber.child) {
     return fiber.child;
   }
-  if (fiber.sibling) {
-    return fiber.sibling;
+
+  // handle function component
+  let nextFiber = fiber;
+  while (nextFiber) {
+    if (nextFiber.sibling) {
+      return nextFiber.sibling;
+    }
+    nextFiber = nextFiber.parent;
   }
-  return fiber.parent?.sibling;
 }
 
 requestIdleCallback(workLoop);
