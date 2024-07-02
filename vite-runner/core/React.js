@@ -137,28 +137,30 @@ function initChildren(fiber, children) {
   });
 }
 
+function updateFunctionComponent(fiber) {
+  const children = [fiber.type(fiber.props)];
+  initChildren(fiber, children);
+}
+
+function updateHostComponent(fiber) {
+  if (!fiber.dom) {
+    const dom = (fiber.dom = createDOM(fiber.type));
+    updateProps(dom, fiber.props);
+  }
+  const children = fiber.props.children;
+  initChildren(fiber, children);
+}
+
 function performWorkerOfUnit(fiber) {
   // console.log(fiber.type);
   const isFunctionComponent = typeof fiber.type === "function";
-  if (!isFunctionComponent) {
-    // 1. create dom
-    if (!fiber.dom) {
-      const dom = (fiber.dom = createDOM(fiber.type));
-
-      // fiber.parent.dom.append(dom);
-
-      // 2. handle props
-      updateProps(dom, fiber.props);
-    }
+  if (isFunctionComponent) {
+    updateFunctionComponent(fiber);
+  } else {
+    updateHostComponent(fiber);
   }
 
-  // 3. convert dom tree into linked list and set up the pointers (convertion happens during the traversal for efficiency)
-  const children = isFunctionComponent
-    ? [fiber.type(fiber.props)]
-    : fiber.props.children;
-  initChildren(fiber, children);
-
-  // 4. return next task
+  // return next task
   if (fiber.child) {
     return fiber.child;
   }
