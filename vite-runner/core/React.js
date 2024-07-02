@@ -88,7 +88,13 @@ function commitWork(fiber) {
   if (!fiber) {
     return;
   }
-  fiber.parent.dom.append(fiber.dom);
+  let fiberParent = fiber.parent;
+  while (!fiberParent.dom) {
+    fiberParent = fiberParent.parent;
+  }
+  if (fiber.dom) {
+    fiberParent.dom.append(fiber.dom);
+  }
   commitWork(fiber.child);
   commitWork(fiber.sibling);
 }
@@ -107,8 +113,7 @@ function updateProps(dom, props) {
   });
 }
 
-function initChildren(fiber) {
-  const children = fiber.props.children;
+function initChildren(fiber, children) {
   let prevChild = null; // i.e. parent of this node
   children.forEach((child, index) => {
     // if we add the parent directly to vdom, it will break its structure, so we create a new variable here
@@ -130,18 +135,23 @@ function initChildren(fiber) {
 }
 
 function performWorkerOfUnit(fiber) {
-  // 1. create dom
-  if (!fiber.dom) {
-    const dom = (fiber.dom = createDOM(fiber.type));
+  // console.log(fiber.type);
+  const isFunctionComponent = typeof fiber.type === "function";
+  if (!isFunctionComponent) {
+    // 1. create dom
+    if (!fiber.dom) {
+      const dom = (fiber.dom = createDOM(fiber.type));
 
-    // fiber.parent.dom.append(dom);
+      // fiber.parent.dom.append(dom);
 
-    // 2. handle props
-    updateProps(dom, fiber.props);
+      // 2. handle props
+      updateProps(dom, fiber.props);
+    }
   }
 
   // 3. convert dom tree into linked list and set up the pointers (convertion happens during the traversal for efficiency)
-  initChildren(fiber);
+  const children = isFunctionComponent ? [fiber.type()] : fiber.props.children;
+  initChildren(fiber, children);
 
   // 4. return next task
   if (fiber.child) {
