@@ -53,17 +53,17 @@ function createElement(type, props, ...children) {
 // dom.append(textNode);
 
 function render(el, container) {
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: container,
     props: {
       children: [el],
     },
   };
 
-  root = nextWorkOfUnit;
+  nextWorkOfUnit = wipRoot;
 }
 
-let root = null;
+let wipRoot = null;
 let currentRoot = null;
 let nextWorkOfUnit = null;
 function workLoop(deadline) {
@@ -76,7 +76,7 @@ function workLoop(deadline) {
 
   // the tree has been converted to a linked list by this point
   // render all elements (avoid non-existent idle causing render stutter/incomplete render
-  if (!nextWorkOfUnit && root) {
+  if (!nextWorkOfUnit && wipRoot) {
     commitRoot();
   }
 
@@ -84,9 +84,9 @@ function workLoop(deadline) {
 }
 
 function commitRoot() {
-  commitWork(root.child);
-  currentRoot = root;
-  root = null;
+  commitWork(wipRoot.child);
+  currentRoot = wipRoot;
+  wipRoot = null;
 }
 
 function commitWork(fiber) {
@@ -158,7 +158,7 @@ function updateProps(dom, nextProps, prevProps) {
   });
 }
 
-function initChildren(fiber, children) {
+function reconcileChildren(fiber, children) {
   let oldFiber = fiber.alternate?.child;
   let prevChild = null; // i.e. parent of this node
   children.forEach((child, index) => {
@@ -206,7 +206,7 @@ function initChildren(fiber, children) {
 
 function updateFunctionComponent(fiber) {
   const children = [fiber.type(fiber.props)];
-  initChildren(fiber, children);
+  reconcileChildren(fiber, children);
 }
 
 function updateHostComponent(fiber) {
@@ -215,7 +215,7 @@ function updateHostComponent(fiber) {
     updateProps(dom, fiber.props, {});
   }
   const children = fiber.props.children;
-  initChildren(fiber, children);
+  reconcileChildren(fiber, children);
 }
 
 function performWorkerOfUnit(fiber) {
@@ -246,15 +246,14 @@ requestIdleCallback(workLoop);
 
 function update(el, container) {
   // root of the new vdom tree
-  nextWorkOfUnit = {
+  wipRoot = {
     dom: currentRoot.dom,
     props: currentRoot.props,
     // point to the old node so it's faster to compare each node
     // traversing the entire tree to find the node to compare is obviously slower
     alternate: currentRoot,
   };
-
-  root = nextWorkOfUnit;
+  nextWorkOfUnit = wipRoot;
 }
 
 const React = {
