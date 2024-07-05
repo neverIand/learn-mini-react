@@ -20,7 +20,15 @@ function DemoAppFunction() {
 console.log(DemoAppFunction);
 
 function Counter({ num }) {
-  return <div>count:{num}</div>;
+  function handleClick() {
+    console.log("click");
+  }
+
+  return (
+    <div>
+      count:{num} <button onClick={handleClick}>click</button>
+    </div>
+  );
 }
 
 function CounterContainer() {
@@ -40,7 +48,7 @@ function App() {
     <div>
       hello world from mini-react
       <Counter num={10}></Counter>
-      <Counter num={20}></Counter>
+      {/* <Counter num={20}></Counter> */}
       {/* <CounterContainer></CounterContainer> */}
     </div>
   );
