@@ -19,14 +19,19 @@ function DemoAppFunction() {
 // See how jsx is converted by Vite under the hood
 console.log(DemoAppFunction);
 
+let count = 10;
+let props = { id: "testId2" };
 function Counter({ num }) {
   function handleClick() {
     console.log("click");
+    count++;
+    props = {};
+    React.update();
   }
 
   return (
-    <div>
-      count:{num} <button onClick={handleClick}>click</button>
+    <div {...props}>
+      count:{count} <button onClick={handleClick}>click</button>
     </div>
   );
 }
