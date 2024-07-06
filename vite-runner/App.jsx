@@ -1,5 +1,7 @@
 import React from "./core/React";
 import Counter from "./Counter";
+import Counter2 from "./Counter2";
+import './style.css'
 
 // const App = React.createElement(
 //   "div",
@@ -41,7 +43,7 @@ function App() {
   return (
     <div>
       hello world from mini-react
-      <Counter></Counter>
+      <Counter2></Counter2>
     </div>
   );
 }

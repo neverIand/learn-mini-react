@@ -225,6 +225,13 @@ function reconcileChildren(fiber, children) {
     }
     prevChild = newFiber;
   });
+
+  // remove remaining child if there's any
+  // console.log("oldFiber", oldFiber);
+  while (oldFiber) {
+    deletions.push(oldFiber);
+    oldFiber = oldFiber.sibling;
+  }
 }
 
 function updateFunctionComponent(fiber) {
