@@ -66,6 +66,7 @@ function render(el, container) {
 let wipRoot = null;
 let currentRoot = null;
 let nextWorkOfUnit = null;
+let deletions = [];
 function workLoop(deadline) {
   let shouldYeild = false;
   while (!shouldYeild && nextWorkOfUnit) {
@@ -84,9 +85,26 @@ function workLoop(deadline) {
 }
 
 function commitRoot() {
+  // delete all nodes that need to be deleted
+  deletions.forEach(commitDeletion);
   commitWork(wipRoot.child);
   currentRoot = wipRoot;
   wipRoot = null;
+  deletions = [];
+}
+
+function commitDeletion(fiber) {
+  if (fiber.dom) {
+    // Again, since the direct parent of a node in function component is the function itself, it needs to find the parent of this function
+    let fiberParent = fiber.parent;
+    while (!fiberParent.dom) {
+      fiberParent = fiberParent.parent;
+    }
+    fiberParent.dom.removeChild(fiber.dom);
+  } else {
+    // handle function component
+    commitDeletion(fiber.child);
+  }
 }
 
 function commitWork(fiber) {
@@ -189,6 +207,11 @@ function reconcileChildren(fiber, children) {
         dom: null,
         effectTag: "placement",
       };
+
+      if (oldFiber) {
+        // console.log("should delete", oldFiber);
+        deletions.push(oldFiber);
+      }
     }
 
     if (oldFiber) {
