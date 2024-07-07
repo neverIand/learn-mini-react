@@ -183,7 +183,6 @@ function reconcileChildren(fiber, children) {
     const isSameType = oldFiber && oldFiber.type === child.type;
 
     let newFiber;
-
     if (isSameType) {
       // update
       newFiber = {
@@ -197,6 +196,10 @@ function reconcileChildren(fiber, children) {
         alternate: oldFiber,
       };
     } else {
+      if (!child) {
+        // handle cases like { bool&&<element> } where it could be child === false
+        return;
+      }
       // if we add the parent directly to vdom, it will break its structure, so we create a new variable here
       newFiber = {
         type: child.type,
@@ -223,7 +226,11 @@ function reconcileChildren(fiber, children) {
     } else {
       prevChild.sibling = newFiber;
     }
-    prevChild = newFiber;
+
+    // handle boolean values: falsy value should be ignored and the value assignment is not needed
+    if (newFiber) { 
+      prevChild = newFiber;
+    }
   });
 
   // remove remaining child if there's any

@@ -1,7 +1,8 @@
+import Counter3 from "./Counter3";
 import React from "./core/React";
-import Counter from "./Counter";
-import Counter2 from "./Counter2";
-import './style.css'
+// import Counter from "./Counter";
+// import Counter2 from "./Counter2";
+import "./style.css";
 
 // const App = React.createElement(
 //   "div",
@@ -43,7 +44,8 @@ function App() {
   return (
     <div>
       hello world from mini-react
-      <Counter2></Counter2>
+      {/* <Counter2></Counter2> */}
+      <Counter3></Counter3>
     </div>
   );
 }
