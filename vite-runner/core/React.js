@@ -67,11 +67,19 @@ let wipRoot = null;
 let currentRoot = null;
 let nextWorkOfUnit = null;
 let deletions = [];
+let wipFiber = null;
 function workLoop(deadline) {
   let shouldYeild = false;
   while (!shouldYeild && nextWorkOfUnit) {
     // execute current task and return next task
     nextWorkOfUnit = performWorkerOfUnit(nextWorkOfUnit);
+
+    if (wipRoot?.sibling?.type === nextWorkOfUnit?.type) {
+      // console.log("hit");
+      // console.log("wipRoot", wipRoot, "nextWorkOfUnit", nextWorkOfUnit);
+      nextWorkOfUnit = undefined;
+    }
+
     shouldYeild = deadline.timeRemaining() < 1;
   }
 
@@ -228,7 +236,7 @@ function reconcileChildren(fiber, children) {
     }
 
     // handle boolean values: falsy value should be ignored and the value assignment is not needed
-    if (newFiber) { 
+    if (newFiber) {
       prevChild = newFiber;
     }
   });
@@ -242,6 +250,7 @@ function reconcileChildren(fiber, children) {
 }
 
 function updateFunctionComponent(fiber) {
+  wipFiber = fiber;
   const children = [fiber.type(fiber.props)];
   reconcileChildren(fiber, children);
 }
@@ -281,16 +290,23 @@ function performWorkerOfUnit(fiber) {
 
 requestIdleCallback(workLoop);
 
-function update(el, container) {
-  // root of the new vdom tree
-  wipRoot = {
-    dom: currentRoot.dom,
-    props: currentRoot.props,
-    // point to the old node so it's faster to compare each node
-    // traversing the entire tree to find the node to compare is obviously slower
-    alternate: currentRoot,
+function update() {
+  let currentFiber = wipFiber;
+  return () => {
+    console.log(currentFiber);
+
+    wipRoot = {
+      ...currentFiber,
+      alternate: currentFiber,
+    };
+
+    // wipRoot = {
+    //   dom: currentRoot.dom,
+    //   props: currentRoot.props,
+    //   alternate: currentRoot,
+    // };
+    nextWorkOfUnit = wipRoot;
   };
-  nextWorkOfUnit = wipRoot;
 }
 
 const React = {
