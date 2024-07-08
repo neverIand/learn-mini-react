@@ -1,20 +1,23 @@
 import React from "./core/React";
 import "./style.css";
 
-let countFoo = 1;
 function Foo() {
   console.log("foo rerun");
-  const update = React.update();
+  const [count, setCount] = React.useState(10);
+  const [str, setStr] = React.useState("hi");
 
   function handleClick() {
-    countFoo++;
-    update();
+    setCount((c) => c + 1);
+    setStr((s) => s + " foo");
   }
 
   return (
     <div>
       <h1>Foo</h1>
-      {countFoo}
+      count: {count}
+      <br />
+      str: {str}
+      <br />
       <button onClick={handleClick}>click</button>
     </div>
   );
@@ -51,10 +54,10 @@ function App2() {
 
   return (
     <div>
-      App count: {countRoot}
-      <button onClick={handleClick}>click</button>
+      {/* App count: {countRoot} */}
+      {/* <button onClick={handleClick}>click</button> */}
       <Foo></Foo>
-      <Bar></Bar>
+      {/* <Bar></Bar> */}
     </div>
   );
 }
