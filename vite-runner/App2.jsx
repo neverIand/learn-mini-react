@@ -8,7 +8,8 @@ function Foo() {
 
   function handleClick() {
     setCount((c) => c + 1);
-    setStr((s) => s + " foo");
+    // setStr((s) => s + " foo");
+    setStr("bar");
   }
 
   return (

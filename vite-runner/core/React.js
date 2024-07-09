@@ -319,7 +319,7 @@ function useState(initial) {
   stateHook.queue.forEach((action) => {
     stateHook.state = action(stateHook.state);
   });
-  
+
   stateHook.queue = [];
 
   // handle multiple states
@@ -332,7 +332,7 @@ function useState(initial) {
     // stateHook.state = action(stateHook.state);
 
     // batch update: store the operation first
-    stateHook.queue.push(action);
+    stateHook.queue.push(typeof action === "function" ? action : () => action);
 
     wipRoot = {
       ...currentFiber,
