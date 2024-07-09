@@ -7,9 +7,10 @@ function Foo() {
   const [str, setStr] = React.useState("hi");
 
   function handleClick() {
-    setCount((c) => c + 1);
+    // setCount((c) => c + 1);
     // setStr((s) => s + " foo");
-    setStr("bar");
+    // setStr("bar");
+    setStr(() => "bar");
   }
 
   return (

@@ -328,6 +328,14 @@ function useState(initial) {
   currentFiber.stateHooks = stateHooks;
 
   function setState(action) {
+    // the result of calling action
+    const eagerState =
+      typeof action === "function" ? action(stateHook.state) : action;
+
+    if (eagerState === stateHook.state) {
+      return;
+    }
+
     // immediately execute update
     // stateHook.state = action(stateHook.state);
 
