@@ -16,11 +16,37 @@ function Foo() {
   // useEffect: called when React finished rendering DOM, before browser finished drawing
   React.useEffect(() => {
     console.log("init");
+
+    // cleanup function will be invoked before calling (next) useEffect
+    // when deps array is empty, cleanup will not be called
+    return () => {
+      console.log("cleanup 0");
+    };
   }, []);
 
   React.useEffect(() => {
-    console.log("update", count);
+    console.log("useEffect1 call, update", count);
+
+    return () => {
+      console.log("cleanup 1");
+    };
   }, [count /* 1 */]);
+
+  React.useEffect(() => {
+    console.log("useEffect2 call, update", count);
+
+    return () => {
+      console.log("cleanup 2");
+    };
+  }, [count]);
+
+  // TODO
+  // React.useEffect(() => {
+  //   console.log("No deps");
+  //   return () => {
+  //     console.log("cleanup 3");
+  //   };
+  // });
 
   return (
     <div>

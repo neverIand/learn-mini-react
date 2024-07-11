@@ -110,7 +110,7 @@ function commitEffectHooks() {
     if (!fiber.alternate) {
       // execute callback anyway during component init
       fiber.effectHooks?.forEach((hook) => {
-        hook.callback();
+        hook.cleanup = hook.callback();
       });
     } else {
       // check if deps have changed
@@ -122,7 +122,7 @@ function commitEffectHooks() {
             return oldDep !== newHook.deps[j];
           });
 
-          needUpdate && newHook.callback();
+          needUpdate && (newHook.cleanup = newHook.callback());
         }
       });
     }
@@ -131,6 +131,22 @@ function commitEffectHooks() {
     run(fiber.sibling);
   }
 
+  function runCleanup(fiber) {
+    if (!fiber) {
+      return;
+    }
+    fiber.alternate?.effectHooks?.forEach((hook) => {
+      if (hook.deps.length > 0) {
+        hook.cleanup && hook.cleanup();
+      }
+    });
+
+    runCleanup(fiber.child);
+    runCleanup(fiber.sibling);
+  }
+
+  // call cleanup before next update
+  runCleanup(wipRoot);
   run(wipRoot);
 }
 
@@ -392,6 +408,7 @@ function useEffect(callback, deps) {
   const effectHook = {
     callback,
     deps,
+    cleanup: undefined,
   };
   effectHooks.push(effectHook);
 
