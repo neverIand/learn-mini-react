@@ -11,7 +11,11 @@ import React from "./core/React.js";
 import ReactDOM from "./core/ReactDOM.js";
 import App from "./App.jsx";
 import App2 from "./App2.jsx";
+import TodoList from "./src/TodoList.jsx";
 
 // ReactDOM.createRoot(document.getElementById("root")).render(App);
 // ReactDOM.createRoot(document.getElementById("root")).render(<App></App>);
-ReactDOM.createRoot(document.getElementById("root")).render(<App2></App2>);
+// ReactDOM.createRoot(document.getElementById("root")).render(<App2></App2>);
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <TodoList></TodoList>
+);
