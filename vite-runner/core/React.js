@@ -87,12 +87,21 @@ function workLoop(deadline) {
   // render all elements (avoid non-existent idle causing render stutter/incomplete render
   if (!nextWorkOfUnit && wipRoot) {
     commitRoot();
+
+    if (nextWorkOfUnit) {
+      wipRoot = currentRoot; // to call workLoop again
+    }
   }
+
+  // if (nextWorkOfUnit && !wipRoot) {
+  //   wipRoot = currentRoot; // to call workLoop again
+  // }
 
   requestIdleCallback(workLoop);
 }
 
 function commitRoot() {
+  // console.log("commitRoot");
   // delete all nodes that need to be deleted
   deletions.forEach(commitDeletion);
   commitWork(wipRoot.child);

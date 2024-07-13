@@ -17,17 +17,31 @@ function TodoList() {
     {
       id: crypto.randomUUID(),
       title: "Code",
-      status: "done",
+      status: "active",
     },
   ]);
+
+  console.log("todos state", todos);
+
+  React.useEffect(() => {
+    const cachedTodos = localStorage.getItem("todos");
+    if (cachedTodos) {
+      console.log("cachedTodos", cachedTodos);
+      setTodos(JSON.parse(cachedTodos));
+    }
+  }, []);
 
   function handleAdd() {
     addTodo(inputValue);
     setInputValue("");
   }
 
+  function createTodo(title) {
+    return { title, status: "active", id: crypto.randomUUID() };
+  }
+
   function addTodo(title) {
-    setTodos((todos) => [...todos, { title }]);
+    setTodos((todos) => [...todos, createTodo(title)]);
   }
 
   function removeTodo(id) {
@@ -57,6 +71,10 @@ function TodoList() {
     setTodos(newTodos);
   }
 
+  function saveTodo() {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }
+
   return (
     <div>
       <h1>TODOS</h1>
@@ -70,28 +88,30 @@ function TodoList() {
       </div>
 
       <div>
-        <ul>
-          {...todos.map((todo) => {
-            return (
-              // <li>
-              //   <span className={todo.status}>{todo.title}</span>
-              //   <button onClick={() => removeTodo(todo.id)}>remove</button>
-              //   {todo.status === "done" ? (
-              //     <button onClick={() => cancelTodo(todo.id)}>cancel</button>
-              //   ) : (
-              //     <button onClick={() => doneTodo(todo.id)}>done</button>
-              //   )}
-              // </li>
-              <TodoItem
-                todo={todo}
-                removeTodo={removeTodo}
-                cancelTodo={cancelTodo}
-                doneTodo={doneTodo}
-              ></TodoItem>
-            );
-          })}
-        </ul>
+        <button onClick={saveTodo}>save</button>
       </div>
+
+      <ul>
+        {...todos.map((todo) => {
+          return (
+            // <li>
+            //   <span className={todo.status}>{todo.title}</span>
+            //   <button onClick={() => removeTodo(todo.id)}>remove</button>
+            //   {todo.status === "done" ? (
+            //     <button onClick={() => cancelTodo(todo.id)}>cancel</button>
+            //   ) : (
+            //     <button onClick={() => doneTodo(todo.id)}>done</button>
+            //   )}
+            // </li>
+            <TodoItem
+              todo={todo}
+              removeTodo={removeTodo}
+              cancelTodo={cancelTodo}
+              doneTodo={doneTodo}
+            ></TodoItem>
+          );
+        })}
+      </ul>
     </div>
   );
 }
