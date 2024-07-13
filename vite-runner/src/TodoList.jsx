@@ -3,6 +3,8 @@ import "./TodoList.css";
 import TodoItem from "./components/TodoItem";
 function TodoList() {
   const [inputValue, setInputValue] = React.useState("");
+  const [filter, setFilter] = React.useState("all");
+  const [displayTodos, setDisplayTodos] = React.useState([]);
   const [todos, setTodos] = React.useState([
     {
       id: crypto.randomUUID(),
@@ -30,6 +32,22 @@ function TodoList() {
       setTodos(JSON.parse(cachedTodos));
     }
   }, []);
+
+  React.useEffect(() => {
+    if (filter === "all") {
+      setDisplayTodos(todos);
+    } else if (filter === "active") {
+      const newTodos = todos.filter((todo) => {
+        return todo.status === "active";
+      });
+      setDisplayTodos(newTodos);
+    } else if (filter === "done") {
+      const newTodos = todos.filter((todo) => {
+        return todo.status === "done";
+      });
+      setDisplayTodos(newTodos);
+    }
+  }, [filter, todos]);
 
   function handleAdd() {
     addTodo(inputValue);
@@ -91,18 +109,38 @@ function TodoList() {
         <button onClick={saveTodo}>save</button>
       </div>
 
+      <div>
+        <input
+          type="radio"
+          name="filter"
+          id="all"
+          checked={filter === "all"}
+          onChange={() => setFilter("all")}
+        />
+        <label htmlFor="all">all</label>
+
+        <input
+          type="radio"
+          name="filter"
+          id="active"
+          checked={filter === "active"}
+          onChange={() => setFilter("active")}
+        />
+        <label htmlFor="active">active</label>
+
+        <input
+          type="radio"
+          name="filter"
+          id="done"
+          checked={filter === "done"}
+          onChange={() => setFilter("done")}
+        />
+        <label htmlFor="done">done</label>
+      </div>
+
       <ul>
-        {...todos.map((todo) => {
+        {...displayTodos.map((todo) => {
           return (
-            // <li>
-            //   <span className={todo.status}>{todo.title}</span>
-            //   <button onClick={() => removeTodo(todo.id)}>remove</button>
-            //   {todo.status === "done" ? (
-            //     <button onClick={() => cancelTodo(todo.id)}>cancel</button>
-            //   ) : (
-            //     <button onClick={() => doneTodo(todo.id)}>done</button>
-            //   )}
-            // </li>
             <TodoItem
               todo={todo}
               removeTodo={removeTodo}
